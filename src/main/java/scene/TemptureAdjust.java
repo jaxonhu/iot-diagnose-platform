@@ -1,31 +1,42 @@
 package scene;
 
-import device.Device;
+import Condition.Condition;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class TemptureAdjust {
 
-    public Device airCondition;
+    public Device ifDevice;
 
-    public Device tempSensor;
+    public Device thenDevice;
 
-    private static boolean isRunning = false;
+    private static boolean isRunning = true;
 
     private Condition condition;
 
     public ExecutorService es = Executors.newSingleThreadExecutor();
 
-    private Runnable task = new CheckTask(condition, tempSensor, airCondition);
+    private Runnable task;
 
-
-    public void run() {
-        es.submit(task);
+    public TemptureAdjust(Device ifDevice, Device thenDevice) {
+        this.ifDevice = ifDevice;
+        this.thenDevice = thenDevice;
     }
 
-    class CheckTask implements  Runnable {
+    public void setCondition(Condition condition) {
+        this.condition = condition;
+    }
+
+    public void run() {
+        assert condition != null;
+        assert ifDevice != null;
+        assert thenDevice != null;
+        task = new CheckTask(condition, ifDevice, thenDevice);
+        es.execute(task);
+    }
+
+    class CheckTask implements Runnable {
 
         private Condition condition;
         private Device ifDevice;
@@ -40,25 +51,17 @@ public class TemptureAdjust {
         @Override
         public void run() {
             while(isRunning) {
-                if(condition.ifCondition(ifDevice))
+                if(condition.ifCondition(ifDevice)) {
                     condition.trigger(thenDevice);
+                   thenDevice.onServiceChange();
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
-
-
-    class Condition {
-
-        public boolean ifCondition(Device deviceSource) {
-            //Todo
-            return true;
-        }
-
-        public void trigger(Device deviceTarget) {
-            //todo
-            //触发某个service
-        }
-
     }
 
 }

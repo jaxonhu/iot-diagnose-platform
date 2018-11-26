@@ -10,9 +10,9 @@ public class Utils {
             case "String":
                 res = (String) origin;
             case "int":
-                res = Integer.valueOf((String)origin);
+                res = Integer.valueOf(String.valueOf(origin));
             case "double":
-                res = Double.valueOf((String)origin);
+                res = Double.valueOf(String.valueOf(origin));
             default:    // 默认透传
                 res = origin;
         }
